@@ -77,7 +77,7 @@ fn main() {
         .get_one::<String>("silence_threshold")
         .unwrap()
         .parse()
-        .unwrap_or(70);
+        .unwrap_or(100);
     let silence_debounce_threshold = matches
         .get_one::<String>("silence_debounce_threshold")
         .unwrap()

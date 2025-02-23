@@ -31,7 +31,6 @@ if (filename) {
 
 const ollama = new Ollama({ host: "http://forebrain.local:11434" });
 
-
 history.push({ role: "user", content: input });
 saveHistory();
 
@@ -45,13 +44,9 @@ saveHistory();
 //   return history.slice(i + 1);
 // }
 
-
 const stream = await ollama.chat({
   model: "gemma2:27b",
-  messages: [
-    { role: "system", content: argv.system },
-    ...history,
-  ],
+  messages: [{ role: "system", content: argv.system }, ...history],
   stream: true,
 });
 
