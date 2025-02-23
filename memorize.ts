@@ -29,7 +29,28 @@ const cmd = new Command()
     .action(async (options, filename) => {
         const inputText = await getInputText(filename);
         await recall(inputText.trim(), options);
-    });
+    })
+    .command("start-qdrant")
+    .description("Start a Qdrant server in Docker with a persistent volume")
+    .action(async () => {
+        const command = new Deno.Command("docker", {
+            args: [
+                "run", "-d",
+                "--name", "qdrant_server",
+                "-p", "6333:6333",
+                "-v", "qdrant_data:/qdrant/storage",
+                "qdrant/qdrant"
+            ],
+            stdout: "inherit",
+            stderr: "inherit",
+        });
+        const { code } = await command.output();
+        if (code === 0) {
+            console.log("Qdrant server started successfully.");
+        } else {
+            console.error("Failed to start Qdrant server.");
+        }
+    });;
 
 await cmd.parse(Deno.args);
 
