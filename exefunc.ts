@@ -1,4 +1,7 @@
 #!/usr/bin/env -S deno run -A
+
+import { parse } from "npm:shell-quote";
+
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 const { Command } = Deno;
@@ -29,7 +32,8 @@ for await (const chunk of Deno.stdin.readable) {
           state = State.FUNCTION_TAG_OPEN;
           buffer = "<";
         } else {
-          Deno.stdout.writeSync(encoder.encode(char));
+          // We don't need to preserve the surrounding messages
+          // Deno.stdout.writeSync(encoder.encode(char));
         }
         break;
 
@@ -39,7 +43,7 @@ for await (const chunk of Deno.stdin.readable) {
           buffer = "";
           state = State.FUNCTION_TAG_EXECUTION;
         } else if (!"<function".startsWith(buffer)) {
-          Deno.stdout.writeSync(encoder.encode(buffer));
+          // Deno.stdout.writeSync(encoder.encode(buffer));
           buffer = "";
           state = State.TEXT;
         }
@@ -49,9 +53,17 @@ for await (const chunk of Deno.stdin.readable) {
         buffer += char;
         if (char === ">") {
           // Extract command from attributes (e.g., <function cmd="espeak-ng -v en">)
-          const match = buffer.match(/cmd="([^"]+)"/);
-          if (match) {
-            const commandArgs = match[1].split(/\s+/);
+          const attrStr = buffer.match(/\b((\w+)\s*=\s*"([^"]+?)")/g);
+          const attrs = attrStr?.reduce((acc: { [key: string]: string }, attr) => {
+            const [key, value] = attr.split("=");
+            acc[key] = value.replace(/"/g, "");
+            return acc;
+          }, {});
+
+          // console.log({ attrs });
+
+          if (attrs?.cmd) {
+            const commandArgs = parse(attrs.cmd);
 
             // Start the command process
             try {
@@ -61,6 +73,10 @@ for await (const chunk of Deno.stdin.readable) {
                 // stdout: "inherit",
                 // stderr: "inherit",
               });
+
+              Deno.writeTextFileSync("execution.log", JSON.stringify(commandArgs) + "\n", { append: true });
+
+              console.log(`${Deno.cwd()}$ ${attrs.cmd}`)
 
               commandProcess = command.spawn();
 

@@ -18,10 +18,20 @@ while true; do
         CONTEXT="$CONTEXT $memories"
     fi
 
-    FULL_PROMPT="$PROMPT\n\n$(date)\nPWD=$(pwd)\nHOST=$(hostnamectl)\nUSER: $(whoami) ($(getent passwd $(whoami) | cut -d ':' -f 5 | cut -d ',' -f 1))\nSystem:\n$(neofetch --stdout)\n>>> Last response: $CONTEXT\n\nUse <function cmd=\"command\"> to execute tasks. Examples:\n<function cmd=\"screen -dmS music mpv --no-video https://ice2.somafm.com/groovesalad-128-mp3\"></function>\n<function cmd=\"screen -X -S music quit\"></function>\n<function cmd=\"espeak-ng\">This is stdin for the command; don't pass in a string in the cmd attr here, please.</function>\n\nMemorize: <function cmd=\"./memorize.ts\">On January 7th, 2012, I ate a sandwich.</function>\nRecall: <function cmd=\"./memorize.ts recall\">What did I eat on January 7th, 2012?</function>."
+
+    EXTRA_INFO="\n\n$(date)\nPWD=$(pwd)\nHOST=$(hostnamectl)\nUSER: $(whoami) ($(getent passwd $(whoami) | cut -d ':' -f 5 | cut -d ',' -f 1))\nSystem:\n$(neofetch --stdout)\n"
+
+    FULL_PROMPT="$PROMPT>>> Last response: $CONTEXT\n\nUse <function cmd=\"command\"> to execute tasks. Examples:\n<function cmd=\"screen -dmS music mpv --no-video https://ice2.somafm.com/groovesalad-128-mp3\"></function>\n<function cmd=\"screen -X -S music quit\"></function>\n<function cmd=\"espeak-ng\">You don't need to run espeak, but you could if you wanted. This is stdin for the command; don't pass in a string in the cmd attr here, please.</function>\n\nMemorize: <function cmd=\"./memorize.ts\">On January 7th, 2012, I ate a sandwich.</function>\nRecall: <function cmd=\"./memorize.ts recall\">What did I eat on January 7th, 2012?</function>."
 
     echo "$FULL_PROMPT"
-    solution=$(echo "$command" | ./main.ts --system "$FULL_PROMPT" | tee >(./speak.ts) | tee /dev/tty | ./exefunc.ts 2>&1)
-    echo "$solution" >> execution.log
-    CONTEXT="$solution"
+
+    while true; do
+        solution=$(echo "$command" | ./main.ts --system "$FULL_PROMPT" | tee >(./speak.ts) | tee /dev/tty | ./exefunc.ts 2>&1)
+        CONTEXT="$CONTEXT $solution"
+        # If there's any solution, rerun the solve to present the results to the assistant
+        if [ -z "$solution" ]; then
+            break
+        fi
+    done
+        
 done

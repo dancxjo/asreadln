@@ -101,7 +101,7 @@ async function recall(query: string, options: Record<string, string>) {
     const collectionName = options.collection;
 
     try {
-        console.log(`🔎 Querying memory for: "${query}"`);
+        console.log(`🔎 Let's see what we can remember about: "${query}"`);
 
         const response = await ollama.embed({ model: options.model, input: [query] });
         const queryVector: number[] = response.embeddings[0];
@@ -114,7 +114,7 @@ async function recall(query: string, options: Record<string, string>) {
             with_payload: true,
         });
 
-        console.log("🧠 Recall results:");
+        console.log("🧠 You can remember this:");
         for (const result of searchResults) {
             if (result.payload) {
                 console.log(`- ${result.payload.text} (score: ${result.score.toFixed(3)})`);
