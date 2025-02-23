@@ -34,19 +34,19 @@ const ollama = new Ollama({ host: "http://forebrain.local:11434" });
 history.push({ role: "user", content: input });
 saveHistory();
 
-// function abbreviateHistory(history: Message[], maxLength: number): Message[] {
-//   let length = 0;
-//   let i = history.length - 1;
-//   while (length < maxLength && i >= 0) {
-//     length += history[i].content.length;
-//     i--;
-//   }
-//   return history.slice(i + 1);
-// }
+function abbreviateHistory(history: Message[], maxLength: number): Message[] {
+  let length = 0;
+  let i = history.length - 1;
+  while (length < maxLength && i >= 0) {
+    length += history[i].content.length;
+    i--;
+  }
+  return history.slice(i + 1);
+}
 
 const stream = await ollama.chat({
   model: "gemma2:27b",
-  messages: [{ role: "system", content: argv.system }, ...history],
+  messages: [{ role: "system", content: argv.system }, ...abbreviateHistory(history, 11)],
   stream: true,
 });
 
