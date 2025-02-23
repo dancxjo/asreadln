@@ -1,0 +1,3 @@
+#!./llm.sh --shebang
+
+Write a bash script to generate a random password. Do not explain your reasoning.
