@@ -19,7 +19,7 @@ fn main() {
         .arg(
             Arg::new("vad_mode")
                 .long("vad-mode")
-                .default_value("VeryAggressive")
+                .default_value("Aggressive")
                 .help("Set the VAD mode: Quality, LowBitrate, Aggressive, or VeryAggressive"),
         )
         .arg(
@@ -37,13 +37,13 @@ fn main() {
         .arg(
             Arg::new("silence_debounce_threshold")
                 .long("silence-debounce-threshold")
-                .default_value("5")
+                .default_value("4")
                 .help("Set the silence debounce threshold"),
         )
         .arg(
             Arg::new("initial_silence_threshold")
                 .long("initial-silence-threshold")
-                .default_value("50")
+                .default_value("40")
                 .help("Set the initial silence threshold before activation"),
         )
         .arg(
